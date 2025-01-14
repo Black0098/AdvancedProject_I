@@ -1,0 +1,7 @@
+
+Esta libreta es exclusivamente de ideas que se pueden implementar a futuro para el desarrollo del codigo DXF
+    
+    - la funcion GiveText puede entregar un codigo binario segun las entidades presentes en el modelo, esto puede ser util
+      para saber el orden que debe tomar la maquina segun el archivo que esta lea
+        
+        * Esta es una aproximacion ya que todavia no estoy conciente de como hacer mover la maquina como tal
