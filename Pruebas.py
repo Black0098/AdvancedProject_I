@@ -13,3 +13,4 @@ from Modules.Galil_functions import *
 
 axis = 'A'
 print('HOLAAAAAA\"OLA\"')
+print('example for a git merge')
