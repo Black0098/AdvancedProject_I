@@ -32,7 +32,7 @@ def give_info(g):
     """
     try: 
         info = g.GInfo()
-        print(g.GInfo())
+        print(info)
     except Exception as e:
         print("Error al dar informacion:", e)
 
