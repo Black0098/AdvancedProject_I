@@ -7,35 +7,6 @@ from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from Modules.dxf_functions import *
 from Modules.Galil_functions import *
 
-#Simulated functions------------------------------------------------------------------------------------------------------------
-
-def send_simulated_order(order):
-    """
-    Tells the driver what to do based on the Galil instructions
-
-    """
-    try: 
-        if not isinstance(order, str):
-            order = str(order)
-
-        print(order)
-        
-        
-    except Exception as e:
-        print("Error al enviar un comando:", e)
-        
-def move_simulated_axis(axis, distance):
-    '''moves the simulated axis to a specified distance'''
-  
-    try:
-        order = f'PR{axis} = {distance}'    #Uses the PR command (position relative)
-        send_simulated_order(order)
-        send_simulated_order(f'BG{axis}')
-        send_simulated_order(f'AM{axis}')
-        print(f"Eje {axis} moviendose a {distance} \"unidades\".")
-        
-    except Exception as e:
-        print("Error al mover el eje:", e)
 
 
 #Galil connection----------------------------------------------------------------------------------------------------------------
@@ -51,36 +22,94 @@ model = doc.modelspace()
 lines, polylines, lwpolylines, splines, circles, texts, mtexts, hatchs, dimentions, inserts, arcs = GiveTypes(model, print_e=False)
 allpaths = AllPathSelect(lines, polylines, lwpolylines, splines, circles, texts, mtexts, hatchs, dimentions, inserts, arcs, 5)
 
-print('\n')
+print('\n PRUEBA DE ALLPATHS')
 print(allpaths[4][4])
 
-#print(f'\nMueve el eje X de {allpaths[0][0][0]} a {allpaths[0][0+1][0]}')
+def mmtocounts(mm):
+    counts = round(mm/3e-5)
+    return counts
 
-axisa = 'A'
-axisb = 'B'
+
+
+
+g = gclib.py()
+g = driver_conection('192.168.1.100')
+#g = driver_conection('COM4 -b 19200')
+give_info(g)
+g.GTimeout(int(30e3))
+c = g.GCommand
+
+x = mmtocounts(75-12)              # Posición final (en mm)
+y = mmtocounts(75+16)
+
+
+
+c(f'PR {x},{y}')
+c('BG AB')
+
+
+g.GMotionComplete('AB')
+print('\n in center \n')
+
+input('Press Enter to continue...')
 
 
 for i in range(len(allpaths)):
     if len(allpaths[:][i]) == 2:
         print(f'  -------------START_{i}-------------' )
         print('\n -------------FROM-------------' )
-        move_simulated_axis(axisa, allpaths[i][0][0])
-        move_simulated_axis(axisb, allpaths[i][0][1])
 
+        allpaths[i][0][0] = mmtocounts(allpaths[i][0][0])
+        allpaths[i][0][1] = mmtocounts(allpaths[i][0][1])
 
+        c(f'PR {0.1*allpaths[i][0][0]},{0.1*allpaths[i][0][1]}')
+        c('BG AB')
+        g.GMotionComplete('AB')
 
         print('start lasser')
 
         print('\n -------------TO-------------' )
-        move_simulated_axis(axisa, allpaths[i][1][0])
-        move_simulated_axis(axisb, allpaths[i][1][1])
+
+        allpaths[i][1][0] = mmtocounts(allpaths[i][1][0])
+        allpaths[i][1][1] = mmtocounts(allpaths[i][1][1])
+
+        c(f'PR {0.1*allpaths[i][1][0]},{0.1*allpaths[i][1][1]}')
+        c('BG AB')
+        g.GMotionComplete('AB')
 
 
         print('stop lasser')
         print(f'\n -------------FINISH_{i}-------------' )
+
     else:
         print(f'\n\n\nes un circulo compuesto por {len(allpaths[:][i])} lineas') 
-        
+        for j in range(len(allpaths[:][i])-1):
+            
+            print(f'  -------------START_{i}_{j}-------------' )
+            print('\n -------------FROM-------------' )
+
+            allpaths[i][j][0] = mmtocounts(allpaths[i][j][0])
+            allpaths[i][j][1] = mmtocounts(allpaths[i][j][1])
+
+            c(f'PR {0.1*allpaths[i][j][0]},{0.1*allpaths[i][j][1]}')
+            c('BG AB')
+            g.GMotionComplete('AB')
+            
+
+            print('start lasser')
+
+            print('\n -------------TO-------------' )
+
+            allpaths[i][j+1][0] = mmtocounts(allpaths[i][j+1][0])
+            allpaths[i][j+1][1] = mmtocounts(allpaths[i][j+1][1])
+
+            c(f'PR {0.1*allpaths[i][j+1][0]},{0.1*allpaths[i][j+1][1]}')
+            c('BG AB')
+            g.GMotionComplete('AB')
+
+            print('stop lasser')
+            print(f'\n -------------FINISH_{i}_{j}-------------' )
+
 
 
 

@@ -46,8 +46,8 @@ def main():
     ###########################################################################
     #  Connect
     ###########################################################################
-    g.GOpen('192.168.0.42 -s ALL')
-    #g.GOpen('COM1')inf
+    #g.GOpen('192.168.0.42 -s ALL')
+    g.GOpen('COM3 -b 19200') 
     print(g.GInfo())
 
     ###########################################################################
@@ -119,21 +119,20 @@ def main():
     ###########################################################################
     # Misc
     ###########################################################################
-    '''
+    
     #Motion Complete
     print('Motion Complete')
     c = g.GCommand #alias the command callable
     c('AB') #abort motion and program
     c('MO') #turn off all motors
     c('SHA') #servo A
-    c('SPA=1000') #speead, 1000 cts/sec
-    c('PRA=3000') #relative move, 3000 cts
+    c('SPA=000') #speead, 1000 cts/sec
+    c('PRA=1') #relative move, 3000 cts
     print(' Starting move...')
     c('BGA') #begin motion
     g.GMotionComplete('A')
     print(' done.')
     del c #delete the alias
-    '''
   ###########################################################################
   # except handler
   ###########################################################################
