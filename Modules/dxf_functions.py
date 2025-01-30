@@ -151,6 +151,7 @@ def AllPathSelect(lines, polylines, lwpolylines, splines, circles, texts, mtexts
     return allpaths
 
 def DXF():
+    global doc
     # Initialize tk
     root = tk.Tk()
     root.withdraw()  # Hide window
@@ -166,13 +167,13 @@ def DXF():
             # Read DXF
             doc = ezdxf.readfile(ruta_archivo)
             print(f"Archivo DXF cargado con exito: {ruta_archivo}")
-            return doc
+        
         except Exception as e:
             print(f"Error al leer el archivo DXF: {e}")
-            return None
+            doc = None
     else:
         print("No se selecciono ningun archivo.")
-        return None
+        doc = None
 
 
 #----------------------------------------------------------------------------------------------------PLOT--------------------------------------------------------------------
