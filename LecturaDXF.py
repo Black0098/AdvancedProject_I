@@ -27,7 +27,7 @@ allpaths = AllPathSelect(lines, polylines, lwpolylines, splines, circles, texts,
 max_lim = max(array.max() for array in allpaths)
 
 
-print("\n \n", allpaths[1])
+#print("\n \n", allpaths[1])
 
 
 #-----------------------------------------------------------------------------Grafica-----------------------------------------------------------------------------------------------------

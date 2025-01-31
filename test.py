@@ -1,12 +1,28 @@
-ez_squarex = [-5, -5, 5, 5, -5]
-ez_squarey = [-5, 5, 5, -5, -5]
+
+from Modules.Galil_functions import driver_conection, give_info, close_conection
+import gclib
+
+g = gclib.py()
+g = driver_conection('192.168.1.100')
+give_info(g)
 
 
 def mmtocounts(mm):
     counts = round(mm/3e-5)
     return counts
 
-for i in range(5):
-    ez_squarex[i] = mmtocounts(ez_squarex[i])
+def degtocounts(deg):
+    return round(deg/8.05556e-5)
 
-print(ez_squarex)
+deg = 10
+
+c = g.GCommand
+c('SP , , 150000')
+print(c('RP'))
+c(f'PR , , {degtocounts(deg)}')
+c('BG C')
+g.GMotionComplete('C')
+
+close_conection(g)
+
+

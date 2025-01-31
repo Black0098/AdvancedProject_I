@@ -53,6 +53,7 @@ def send_order(g, order):
         return None
 
 def move_axis(g, axis, distance, MC = True):
+
     """
     moves the axis to a specified distance
 
@@ -67,3 +68,54 @@ def move_axis(g, axis, distance, MC = True):
         
     except Exception as e:
         print("Error al mover el eje:", e)
+
+def mmtocounts(mm):
+    counts = round(mm/3e-5)
+    return counts
+
+def process_dxf(allpaths, g):
+    
+    c = g.GCommand 
+
+    for i in range(len(allpaths)):
+        if len(allpaths[:][i]) == 2: #This Case Verifyes if the entity is a LINE
+            print(f'  -------------START_{i}-------------' )
+            print('\n -------------FROM-------------' )
+
+            allpaths[i][0][0] = mmtocounts(allpaths[i][0][0])
+            allpaths[i][0][1] = mmtocounts(allpaths[i][0][1])
+
+            c(f'PA {0.1*allpaths[i][0][0]},{0.1*allpaths[i][0][1]}')
+            c('BG AB')
+            g.GMotionComplete('AB')
+
+            print('start lasser')
+
+            print('\n -------------TO-------------' )
+
+            allpaths[i][1][0] = mmtocounts(allpaths[i][1][0])
+            allpaths[i][1][1] = mmtocounts(allpaths[i][1][1])
+
+            c(f'PA {0.5*allpaths[i][1][0]},{0.5*allpaths[i][1][1]}')
+            c('BG AB')
+            g.GMotionComplete('AB')
+
+
+            print('stop lasser')
+            print(f'\n -------------FINISH_{i}-------------' )
+
+        else:
+            print(f'\n\n\n es una Polinline compuesta por:  {len(allpaths[:][i])} lineas') 
+
+            
+            for j in range(len(allpaths[:][i])):
+
+                allpaths[i][j][0] = mmtocounts(allpaths[i][j][0])
+                allpaths[i][j][1] = mmtocounts(allpaths[i][j][1])
+
+                c(f'PA {0.5*allpaths[i][j][0]},{0.5*allpaths[i][j][1]}')
+                c('BG AB')
+                g.GMotionComplete('AB')
+                   
+                
+    return

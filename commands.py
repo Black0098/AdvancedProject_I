@@ -9,23 +9,22 @@ print('')
 g = driver_conection('192.168.1.100')
 give_info(g)
 
+doc = DXF()
+#doc = ezdxf.readfile("DXFs\CirculoYCuadrado.DXF")     #allways the same dxf
+model = doc.modelspace()
+
+lines, polylines, lwpolylines, splines, circles, texts, mtexts, hatchs, dimentions, inserts, arcs = GiveTypes(model, print_e=False)
+allpaths = AllPathSelect(lines, polylines, lwpolylines, splines, circles, texts, mtexts, hatchs, dimentions, inserts, arcs, 5)
 
 
-x = 75-12              # Posición final (en mm)
-y = 75+16
+x = 35              # Posición final (en mm)
+y = -35
 z = 0
 
 xc= round(x/3e-5)  # Conversión de mm a unidades
 yc= round(y/3e-5)  
 zc= round(z/3e-5)  
 
-
-
-ez_squarex = [5.0, 2.0225, 1.5451, -0.7725, -4.0451, -2.5, -4.0451, -0.7725, 1.5451, 2.0225]
-ez_squarey = [0.0, 1.4695, 4.7553, 2.3776, 2.9389, 0.0, -2.9389, -2.3776, -4.7553, -1.4695]
-
-ez_squarex = [x * 2 for x in ez_squarex]
-ez_squarey = [y * 2 for y in ez_squarey]
 
 def mmtocounts(mm):
     counts = round(mm/3e-5)
@@ -34,43 +33,60 @@ def mmtocounts(mm):
 
 time_out  = int(30e3)
 c = g.GCommand
-close_conection(g)
-
-try:    
 
 
-
+menu = bool
+while menu:
     g.GTimeout(time_out)
     #c('AC 256000')
     #c('DC 256000')
     c('SP 150000,150000')
-    
 
-    c(f'PR {xc},{yc}')
-    c('BG AB')
+    print("-----------------------------------------------------------------------------------")
+    print("\nBienvenido al panel de controlo V 0.01")
+    print("Digite el numero correspondiente a la accion que desea realizar \n")
+    sel = int(input(' 1. Regresar a Home \n 2. Comenzar lectura del DXF \n 3. Centro \n 4. Establece 0 global \n 5. Salir \n' ))
 
-
-    g.GMotionComplete('AB')
-    print('\n in center \n')
-
-    input('Press Enter to continue...')
-
-    for i in range(len(ez_squarex)):
-        ez_squarex[i] = mmtocounts(ez_squarex[i])
-        ez_squarey[i] = mmtocounts(ez_squarey[i])
-
-        c(f'PR {ez_squarex[i]},{ez_squarey[i]}')
+    if sel == 1: 
+        c('HM')
         c('BG AB')
         g.GMotionComplete('AB')
-        print(f'\n in {i} \n')
+        print('\n En Home (Esto es necesario ya que actualmente no se tiene establecido una coordenada cero en el montaje) \n')
+        
+    elif sel == 2:
+        try :
 
 
-    c('HM')
-    c('BG AB')
-    g.GMotionComplete('AB')
-    print('\n TODO MELO \n')
+            input('Press Enter to continue...')
+            process_dxf(allpaths,g)
 
-except Exception as e:
+        except Exception as e:
 
-    print("Error al conectar:", e)
-    pass
+            print("Error al cumplir la rutina:", e)
+            pass
+
+    elif sel == 3:
+        c(f'PA {0},{0}')
+        c('BG AB')
+        g.GMotionComplete('AB')
+        print(f"\n En centro: {c('RP')}")
+
+    elif sel == 4:
+        c(f'PR {xc},{yc}')  #coordenadas hacia el centro (establecidas manualmente)
+        c('BG AB')       
+        g.GMotionComplete('AB')
+            
+        c('DPA = 0')
+        c('DPB = 0')
+            
+        print(f'\n in center: {c('RP')} \n')
+
+    elif sel == 5:
+        close_conection(g)
+        menu = False
+
+    
+    else:
+        print("por favor seleccione una opcion correcta")
+        pass
+
