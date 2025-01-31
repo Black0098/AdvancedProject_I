@@ -1,5 +1,5 @@
-from Modules.dxf_functions import *
-from Modules.Galil_functions import *
+from Modules.DXF_Reading import *
+from Modules.CNC_Logic import *
 import time
 
 g = gclib.py()
@@ -14,7 +14,7 @@ doc = DXF()
 model = doc.modelspace()
 
 lines, polylines, lwpolylines, splines, circles, texts, mtexts, hatchs, dimentions, inserts, arcs = GiveTypes(model, print_e=False)
-allpaths = AllPathSelect(lines, polylines, lwpolylines, splines, circles, texts, mtexts, hatchs, dimentions, inserts, arcs, 5)
+linepaths, centers, radii  = AllPathSelect(lines, polylines, lwpolylines, splines, circles, texts, mtexts, hatchs, dimentions, inserts, arcs, 5)
 
 
 x = 35              # Posición final (en mm)
@@ -53,12 +53,12 @@ while menu:
         g.GMotionComplete('AB')
         print('\n En Home (Esto es necesario ya que actualmente no se tiene establecido una coordenada cero en el montaje) \n')
         
-    elif sel == 2:
+    elif sel == 2: 
         try :
 
 
             input('Press Enter to continue...')
-            process_dxf(allpaths,g)
+            dxf_lines(linepaths , g)
 
         except Exception as e:
 

@@ -1,11 +1,10 @@
-import ezdxf
-import gclib
+from Modules import *
 from collections import defaultdict
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
-from Modules.dxf_functions import *
-from Modules.Galil_functions import *
+
+
 
 
 
@@ -21,7 +20,7 @@ n_puntos_por_tramo = 2  # Resolución de cada tramo
 allpaths = []
 lines, polylines, lwpolylines, splines, circles, texts, mtexts, hatchs, dimentions, inserts, arcs = GiveTypes(model, print_e=True)
 
-allpaths = AllPathSelect(lines, polylines, lwpolylines, splines, circles, texts, mtexts, hatchs, dimentions, inserts, arcs, 20)
+allpaths, centers, radii = AllPathSelect(lines, polylines, lwpolylines, splines, circles, texts, mtexts, hatchs, dimentions, inserts, arcs, 20)
 
 
 max_lim = max(array.max() for array in allpaths)

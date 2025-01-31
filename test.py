@@ -1,5 +1,5 @@
 
-from Modules.Galil_functions import driver_conection, give_info, close_conection
+from Modules.CNC_Logic import driver_conection, give_info, close_conection
 import gclib
 
 g = gclib.py()

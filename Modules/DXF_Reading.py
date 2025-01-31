@@ -74,6 +74,8 @@ def LinePath(lines, resolution):
 
 def CirclePath(circles, resolution):
     paths = []
+    centers = []
+    radii = []
     theta = np.linspace(0, 2 * np.pi, resolution)
     for circle in circles:
         center = np.array(circle.dxf.center)
@@ -85,7 +87,9 @@ def CirclePath(circles, resolution):
         z = np.full_like(x, center[2])
         coordinates = np.stack((x, y, z), axis=-1)
         paths.append(coordinates)
-    return paths
+        radii.append(round(radius.tolist(),5))
+        centers.append(center.tolist())
+    return paths, centers, radii
 
 def PolyPath (polylines):
     paths = []
@@ -127,6 +131,8 @@ def ArcPath(arcs, resolution):
 
 def AllPathSelect(lines, polylines, lwpolylines, splines, circles, texts, mtexts, hatchs, dimentions, inserts, arcs, circle_n):
     allpaths = []
+    centers = []
+    radii = []
 
     if arcs is not None:
         arcpaths = ArcPath(arcs, circle_n)
@@ -137,8 +143,10 @@ def AllPathSelect(lines, polylines, lwpolylines, splines, circles, texts, mtexts
         allpaths.extend(linepaths)
 
     if circles is not None:
-        circlepaths = CirclePath(circles, circle_n)
+        circlepaths, centers, radii = CirclePath(circles, circle_n)
         allpaths.extend(circlepaths)
+        centers.extend(centers)
+        radii.extend(radii)
 
     if polylines is not None:
         polypaths = PolyPath(polylines)
@@ -148,7 +156,7 @@ def AllPathSelect(lines, polylines, lwpolylines, splines, circles, texts, mtexts
         lwpolypaths = LwPolyPath(lwpolylines)
         allpaths.extend(lwpolypaths)
 
-    return allpaths
+    return allpaths, centers, radii
 
 def DXF():
     # Initialize tk
