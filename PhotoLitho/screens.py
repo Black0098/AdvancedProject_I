@@ -17,44 +17,20 @@ class Home(tk.Frame):
 
     def init_widgets(self):
 
-        tk.Label(
-            self,
-            text="Home",
-            justify="center",
-            **style.STYLE_1
-        ).pack(
-            side="top",
-            fill="both",
-            expand=True,
-            pady= 22,
-            padx= 11,
-        )
+        welcome = tk.Label( self, text="Home", justify="center", **style.STYLE_1)
+        welcome.pack( side="top", fill="both", expand=True, pady= 22, padx= 11, )
 
+        button1 = tk.Button(self, text="Botón 1", **style.STYLE_1, command=lambda: self.controller.show_frame(Manual_mode))
+        button1.pack(pady=5)
 
-        tk.Button( self, text="Manual Mode", command=lambda: self.controller.show_frame(Manual_mode), **style.STYLE_1).pack(
-            side="top",
-            fill="both",
-            expand=True,
-            pady= 22,
-            padx= 11,
-        )
-        tk.Button( self, text="Read_DXF", command=lambda: self.controller.show_frame(Read_DXF), **style.STYLE_1).pack(
-            side="top",
-            fill="both",
-            expand=True,
-            pady= 22,
-            padx= 11,
-        )
-        tk.Button( self, text="Jog_mode", command=lambda: self.controller.show_frame(Jog_mode), **style.STYLE_1).pack(
-            side="top",
-            fill="both",
-            expand=True,
-            pady= 22,
-            padx= 11,
-        )
-        
+        button2 = tk.Button(self, text="Botón 2", **style.STYLE_1, command=lambda: self.controller.show_frame(Jog_mode))
+        button2.pack(pady=5)
 
-    
+        button3 = tk.Button(self, text="Botón 3", **style.STYLE_1, command=lambda: self.controller.show_frame(Read_DXF))
+        button3.pack(pady=5)
+                
+
+            
 
 class Manual_mode(tk.Frame):
 
