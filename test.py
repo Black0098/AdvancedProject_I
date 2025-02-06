@@ -3,6 +3,7 @@ from Modules import *
 import gclib
 import time 
 
+#Controler definition -------------------------------------------------------------
 g = gclib.py()
 g = driver_conection('192.168.1.100')
 give_info(g)
@@ -13,59 +14,41 @@ model = doc.modelspace()
 lines, polylines, lwpolylines, splines, circles, texts, mtexts, hatchs, dimentions, inserts, arcs = GiveTypes(model, print_e=True)
 linepaths, centers, radii = AllPathSelect(lines, polylines, lwpolylines, splines, circles, texts, mtexts, hatchs, dimentions, inserts, arcs, 20)
 
-def mmtocounts(mm):
-    counts = round(mm/3e-5)
-    return counts
 
-def degtocounts(deg):
-    return round(deg/8.05556e-5)
-
-print(linepaths[0])
-
-time.sleep(4)
-c = g.GCommand
-
-c('VM AB')
-c('VS 150000')
-c('VA 1000000')
-c('VD 1000000')
-
-for line in linepaths:  # Itera sobre cada línea en linepaths
-    for point in line[1:]:  # Itera sobre cada punto dentro de la línea
-        x, y, z = map(mm_to_counts, point)  # Convierte los valores
-        
-        c(f'VP {x}, {y}')
-
-c('VE')
-c('BGS')
-
-close_conection(g)
-#Prueba del modo vector HASMIR TE AMO
-
-
-x = 10 #mm
-y = 10 #mm
+for i in range(1,2):
+    print(i)
+    print('hola')
 
 
 
 '''
-def linear_move(g, x, y, g):
-    c = g.GCommand
+
+    for i, entity in enumerate(linepaths):
+        if len(entity) == 2:  #  LINE
+            x1, y1, z1 = map(mm_to_counts, entity[0])
+            x2, y2, z2 = map(mm_to_counts, entity[1])
+            move_to_position(g, x1, y1, scale=1)
+            print('PRENDE LASSER!!!!!!!!!!!')
+            c('VM AB')              #inicializa un plano 2d para x,y
+            c('VS 150000')          #Velocidad del vector 
+            c('VA 1000000')         #Aceleracion del vector
+            c('VD 1000000')         #Desaceleracion del vector
+            c(f'VP {x2-x1}, {y2-y1}')     #Establece la direccion a la que se dirige 
+            c('VE')                 #Finaliza el vector 
+            c('BGS')                #Inicia secuencia
+            print('\nPARA LASER XXXXXXXXXXXX')
+        else: #POLOLINEA
+            print(f'\n\n Es una PolilInea compuesta por {len(entity)} Puntos')
+            x0, y0, z1 = map(mm_to_counts, entity[0])
+            move_to_position(g, x0, y0, scale=1)
+            c('VM AB')              #inicializa un plano 2d para x,y
+            c('VS 150000')          #Velocidad del vector 
+            c('VA 1000000')         #Aceleracion del vector
+            c('VD 1000000')         #Desaceleracion del vector
+            for j, point in enumerate(entity):
+                x, y, z = map(mm_to_counts, point)
+                c(f'VP {x-x0}, {y-y0}')
+            c('VE')
+            c('BGS')
 '''
-
-'''
-c('LMAB')
-c('LI -333333,0')  #Specify first linear segment
-c('LI -333333, -333333')  #Specify second linear segment
-c('LE')         #End linear segments
-c('VS 150000')    #Specify vector speed
-c('BGS')        #Begin motion sequence 
-'''
-
-
-
-#c('CR 233333, 270, -180')
-#c('VP 0 , 233333*2')
-#c('CR 233333, 90, -180')
-
 

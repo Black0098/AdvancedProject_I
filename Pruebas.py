@@ -18,99 +18,78 @@ import time
 #Dxf reading---------------------------------------------------------------------------------------------------------------------
 
 allpaths = []
-doc = ezdxf.readfile("DXFs\LineasYCirculos.DXF")     #allways the same dxf
+doc = ezdxf.readfile("DXFs\LineasYCirculos.DXF") 
+#doc = ezdxf.readfile("DXFs\LineaYPoly.DXF") 
+   #allways the same dxf
 model = doc.modelspace()
 
 lines, polylines, lwpolylines, splines, circles, texts, mtexts, hatchs, dimentions, inserts, arcs = GiveTypes(model, print_e=True)
 linepaths, centers, radii = AllPathSelect(lines, polylines, lwpolylines, splines, circles, texts, mtexts, hatchs, dimentions, inserts, arcs, 5)
 
+print(linepaths)
+
+def Vector_move(g, linepaths, centers, radii):
+    '''
+    This function calculates the trajectory for lines, polylines, circles, and arcs.
+    '''
+    c = g.GCommand
+    # Verificar si alguno de los parámetros es None
+    if linepaths is None:
+        linepaths = []
+    if centers is None:
+        centers = []
+    if radii is None:
+        radii = []
+
+    for i, entity in enumerate(linepaths):
+        if len(entity) == 2:  #  LINE
+            draw_lines(g, entity)
+            
+        else: #POLOLINEA
+            print(f'\n\n Es una PolilInea compuesta por {len(entity)} Puntos')
+            draw_lines(g, entity)
 
 
-g = gclib.py()
-g = driver_conection('192.168.1.100')
-c = g.GCommand
-
-c('SP 150000,150000,150000')
-
-print(centers)
-
-def rotate(g, deg, relative=False, wait = True):
-    """
-    Envía un comando al controlador para girar la máquina a una posición dada.
+def setup_vector_mode(g, VECTOR_SPEED  = 150000, VECTOR_ACCEL  = 1000000, VECTOR_DECEL  = 1000000):
+    """Configura el modo vectorial en 2D (ejes A y B) y sus parámetros."""
+    c = g.GCommand
+    c('VM AB')                         # Inicializa el plano 2D para X, Y
+    c(f'VS {VECTOR_SPEED}')            # Velocidad del vector
+    c(f'VA {VECTOR_ACCEL}')            # Aceleración del vector
+    c(f'VD {VECTOR_DECEL}')            # Desaceleración del vector
     
-    Parámetros:
-        g: Objeto controlador Galil.
-        deg: angulo en 'counts'.
-        relative: Si es True, usa movimiento relativo ('PR'); si es False, usa absoluto ('PA').
+def draw_lines(g, entity):
+    """
+    Dibuja una entidad que puede ser línea (2 puntos) o polilínea (N puntos).
+    - entity: lista de puntos [(x_mm, y_mm, z_mm), ...]
+    - laser_on: indica si queremos encender/apagar láser con mensajes específicos.
     """
     c = g.GCommand
-    command_type = 'PR' if relative else 'PA'
-
-    command = f'{command_type} , , {deg}'
-    c(command)
-    c('BG C')
-    g.GMotionComplete('C') if wait else None
-def dxf_circles(centers, radii, g):
-    """
-    Procesa una lista de entidades DXF y las traduce en movimientos de la máquina.
-
-    Parámetros:
-        centers: Lista de centros de los círculos.
-        radii: Lista de radios de los círculos.
-        g: Objeto controlador Galil.
-    """
-    for i, center in enumerate(centers):
-
-        print(f'  -------------VA_AL_CENTRO_{i}-------------')
-        r = mm_to_counts(radii[i])
-        x, y, z = map(mm_to_counts, center)
-        move_to_position(g, -x+r, -y,scale=0.5)
-        print('start lasser')
-        deg = deg_to_counts(360)
-        rotate(g, deg, relative=True)
-        print(f'\n -------------FINISH_{i}-------------')
-
-
-'''
-time_out  = int(30e3)
-g.GTimeout(time_out)
-
-c = g.GCommand
-c('AC 256000,256000,256000')
-c('DC 256000,256000,256000')
-c('SP 150000,150000, 150000')
-c('PA 0, 0')
-c('BG AB')
-g.GMotionComplete
-
-print('ESPERA 5 sec')
-time.sleep(5)
-
-
-center_x, center_y = 10, 10
-radius = 7
-segments = 36
-angle_inc = 360 / segments   # 10° por segmento
-
-start_x = center_x + radius   # 30 + 7 = 37
-start_y = center_y            # 30
-
-
-move_to_position(g, mm_to_counts(start_x), mm_to_counts(start_y), scale= 1, relative=False)
-c('AC 256000,256000,256000')
-c('DC 556000,556000,556000')
-
-angle_inc_rad = math.radians(angle_inc)
-chord = 2 * radius * math.sin(angle_inc_rad / 2)
-
-for i in range(segments):
-    rotate(g, deg_to_counts(angle_inc), relative=True, wait=False)
-    move_to_position(g, mm_to_counts(chord), scale= 1 , relative=True, wait = False)
+    x0, y0, z0 = map(mm_to_counts, entity[0])
+    move_to_position(g, x0, y0, scale=1)
+    time.sleep(2)
+    print('\nPRENDE LÁSER!!!!!!!!!!!')
+    setup_vector_mode()
     
+    
+    for i in range(1, len(entity)):
+        x, y, z = map(mm_to_counts, entity[i])
+        dx = x - x0
+        dy = y - y0
+        c(f'VP {dx}, {dy}') 
+    c('VE')
+    c('BGS')
+    print('\nPARA LÁSER XXXXXXXXXXXX')
 
 
-'''
-close_conection(g)
+
+
+
+
+
+#g = gclib.py()
+#g = driver_conection('192.168.1.100')
+#c = g.GCommand
 
 
 
