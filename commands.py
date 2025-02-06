@@ -17,8 +17,8 @@ lines, polylines, lwpolylines, splines, circles, texts, mtexts, hatchs, dimentio
 linepaths, centers, radii  = AllPathSelect(lines, polylines, lwpolylines, splines, circles, texts, mtexts, hatchs, dimentions, inserts, arcs, 5)
 
 
-x = 35              # Posición final (en mm)
-y = -35
+x = 75          # Posición final (en mm)
+y = 75+16
 z = 0
 
 xc= round(x/3e-5)  # Conversión de mm a unidades

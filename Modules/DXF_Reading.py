@@ -80,6 +80,8 @@ def CirclePath(circles, resolution):
     for circle in circles:
         center = np.array(circle.dxf.center)
         radius = np.array(circle.dxf.radius)
+        #print(f'\n SOLO HAY {len(circles)}, ESTE ES EL {circle} CON COORDENADAS {center} Y RADIO {radius}')
+        
         
 
         x = center[0] + radius * np.cos(theta)
@@ -145,8 +147,8 @@ def AllPathSelect(lines, polylines, lwpolylines, splines, circles, texts, mtexts
     if circles is not None:
         circlepaths, centers, radii = CirclePath(circles, circle_n)
         allpaths.extend(circlepaths)
-        centers.extend(centers)
-        radii.extend(radii)
+        #centers.extend(centers) POR SI ACASO, POR EL MOMENTO NO ES NECESARIO
+        #radii.extend(radii)
 
     if polylines is not None:
         polypaths = PolyPath(polylines)

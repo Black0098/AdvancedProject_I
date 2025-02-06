@@ -45,7 +45,7 @@ def deg_to_counts(deg):
     return round(deg/8.05556e-5)
 
 
-def move_to_position(g, x, y=None, scale=1.0, relative=False):
+def move_to_position(g, x, y=None, scale=1.0, relative=False, wait = True):
     """
     Envía un comando al controlador para mover la máquina a una posición dada.
     
@@ -67,6 +67,7 @@ def move_to_position(g, x, y=None, scale=1.0, relative=False):
     c(command)
     c('BG AB')
     g.GMotionComplete('AB')
+    g.GMotionComplete('C') if wait else None
 
 
 def dxf_lines(linepaths, g):
@@ -83,14 +84,14 @@ def dxf_lines(linepaths, g):
             print('\n -------------FROM-------------')
 
             x1, y1, z1 = map(mm_to_counts, entity[0])
-            move_to_position(g, x1, y1, scale=0.1)
+            move_to_position(g, x1, y1, scale=1)
 
             print('start lasser')
 
             print('\n -------------TO-------------')
 
             x2, y2, z2 = map(mm_to_counts, entity[1])
-            move_to_position(g, x2, y2, scale=0.5)
+            move_to_position(g, x2, y2, scale=1)
 
             print('stop lasser')
             print(f'\n -------------FINISH_{i}-------------')
@@ -100,4 +101,4 @@ def dxf_lines(linepaths, g):
 
             for j, point in enumerate(entity):
                 x, y, z = map(mm_to_counts, point)
-                move_to_position(g, x, y, scale=0.5)
+                move_to_position(g, x, y, scale=1)
