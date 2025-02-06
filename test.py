@@ -1,6 +1,7 @@
 
 from Modules import *
 import gclib
+import winsound
 import time 
 
 #Controler definition -------------------------------------------------------------
@@ -15,9 +16,25 @@ lines, polylines, lwpolylines, splines, circles, texts, mtexts, hatchs, dimentio
 linepaths, centers, radii = AllPathSelect(lines, polylines, lwpolylines, splines, circles, texts, mtexts, hatchs, dimentions, inserts, arcs, 20)
 
 
-for i in range(1,2):
-    print(i)
-    print('hola')
+
+
+def reproducir_alarma(frecuencia=500, duracion=300):
+    """
+    Reproduce un beep que simula una alarma.
+    
+    Parámetros:
+      - frecuencia: Frecuencia del sonido en Hertz (por defecto 2500 Hz).
+      - duracion: Duración del sonido en milisegundos (por defecto 1000 ms).
+    """
+    winsound.Beep(frecuencia, duracion)
+
+# Reproduce una alarma única
+reproducir_alarma()
+
+# O bien, reproduce la alarma tres veces con una pequeña pausa entre cada una
+#
+#reproducir_alarma()
+
 
 
 
