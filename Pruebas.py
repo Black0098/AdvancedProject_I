@@ -22,8 +22,10 @@ g.GTimeout(int(30e3))
 
 allpaths = []
 #doc = ezdxf.readfile("DXFs\LineasYCirculos.DXF") 
-doc = ezdxf.readfile("DXFs\HexagonoYCuadrado.DXF")
-#doc = ezdxf.readfile("DXFs\LineaYPoly.DXF") 
+#doc = ezdxf.readfile("DXFs\HexagonoYCuadrado.DXF")
+#doc = ezdxf.readfile("DXFs\Poly.DXF") 
+doc = ezdxf.readfile("DXFs\CirculoYCuadrado.DXF") 
+
 model = doc.modelspace()
 
 lines, polylines, lwpolylines, splines, circles, texts, mtexts, hatchs, dimentions, inserts, arcs = GiveTypes(model, print_e=True)
@@ -105,7 +107,31 @@ def draw_lines(g, entity, scale = 1):
 
 time.sleep(3)
 reproducir_alarma()
+
+
+
+def draw_circles(g, center, radius, scale = 1):
+    c = g.GCommand
+    r = mm_to_counts(radius)
+    x0, y0, z0 = map(mm_to_counts, center)
+    move_to_position(g, (x0+r), y0, scale, relative=False)
+    reproducir_alarma(1000, 400)
+    print('\nPRENDE LÁSER!!!!!!!!!!!')
+    setup_vector_mode(g)
+    c(f'CR {r*scale}, 0, 360')
+    c('VE')
+    c('BGS')
+    g.GMotionComplete('AB')
+    reproducir_alarma(1000, 400)
+    print('\nPARA LÁSER XXXXXXXXXXXX')
+
+
+c = g.GCommand
+c('SP 150000,150000')
+
 Vector_move(g, linepaths, circles, radii, scale=0.2)
+for center, radius in zip(centers, radii):
+    draw_circles(g, center, radius, scale=0.2)
 
 
 

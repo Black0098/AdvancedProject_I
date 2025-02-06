@@ -20,7 +20,7 @@ n_puntos_por_tramo = 2  # Resolución de cada tramo
 allpaths = []
 lines, polylines, lwpolylines, splines, circles, texts, mtexts, hatchs, dimentions, inserts, arcs = GiveTypes(model, print_e=True)
 
-allpaths, centers, radii = AllPathSelect(lines, polylines, lwpolylines, splines, circles, texts, mtexts, hatchs, dimentions, inserts, arcs, 20)
+allpaths, centers, radii = AllPathSelect(lines, polylines, lwpolylines, splines, circles, texts, mtexts, hatchs, dimentions, inserts, arcs, 20, simu = True)
 
 
 max_lim = max(array.max() for array in allpaths)

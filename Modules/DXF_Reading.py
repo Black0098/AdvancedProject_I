@@ -131,14 +131,14 @@ def ArcPath(arcs, resolution):
         paths.append(coordinates)
     return paths
 
-def AllPathSelect(lines, polylines, lwpolylines, splines, circles, texts, mtexts, hatchs, dimentions, inserts, arcs, circle_n):
+def AllPathSelect(lines, polylines, lwpolylines, splines, circles, texts, mtexts, hatchs, dimentions, inserts, arcs, circle_n, simu = False):
     allpaths = []
     centers = []
     radii = []
 
     if arcs is not None:
         arcpaths = ArcPath(arcs, circle_n)
-        allpaths.extend(arcpaths)
+        allpaths.extend(arcpaths) if simu else None
 
     if lines is not None:
         linepaths = LinePath(lines, 2)
@@ -146,9 +146,8 @@ def AllPathSelect(lines, polylines, lwpolylines, splines, circles, texts, mtexts
 
     if circles is not None:
         circlepaths, centers, radii = CirclePath(circles, circle_n)
-        allpaths.extend(circlepaths)
-        #centers.extend(centers) POR SI ACASO, POR EL MOMENTO NO ES NECESARIO
-        #radii.extend(radii)
+        allpaths.extend(circlepaths) if simu else None
+
 
     if polylines is not None:
         polypaths = PolyPath(polylines)
