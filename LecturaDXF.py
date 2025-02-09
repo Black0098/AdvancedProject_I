@@ -20,20 +20,26 @@ n_puntos_por_tramo = 2  # Resolución de cada tramo
 allpaths = []
 lines, polylines, lwpolylines, splines, circles, texts, mtexts, hatchs, dimentions, inserts, arcs = GiveTypes(model, print_e=True)
 
-allpaths, centers, radii = AllPathSelect(lines, polylines, lwpolylines, splines, circles, texts, mtexts, hatchs, dimentions, inserts, arcs, 20, simu = True)
+linepaths, curvepaths = AllPathSelect(lines, polylines, lwpolylines, splines, circles, texts, mtexts, hatchs, dimentions, inserts, arcs, 20, simu = True)
 
 
-max_lim = max(array.max() for array in allpaths)
+max_lim = max(array.max() for array in linepaths)
 
 
-#print("\n \n", allpaths[1])
+print(curvepaths[0][0])
+
+print("\n HOLA \n")
+
+for center, radius, angles in curvepaths:
+    if angles == (0, 0):
+        print(f'\ncirculo con centro en {center} y radio de {radius}')
+    else:
+        print(f'\narco con centro en {center} y radio de {radius}\nangulo inicial {angles[0]}\nangulo final {angles[1]}')
 
 
 #-----------------------------------------------------------------------------Grafica-----------------------------------------------------------------------------------------------------
 
-
-
-fig, frames_totales, actualizar, reiniciar_animacion = Plot_Animation(allpaths, max_lim)
+fig, frames_totales, actualizar, reiniciar_animacion = Plot_Animation(linepaths, max_lim)
 anim = FuncAnimation(fig, actualizar, frames=frames_totales, interval=50, blit=True, repeat=False, init_func = reiniciar_animacion)
 plt.show()
 

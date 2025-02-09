@@ -76,6 +76,7 @@ def CirclePath(circles, resolution):
     paths = []
     centers = []
     radii = []
+    angles = []
     theta = np.linspace(0, 2 * np.pi, resolution)
     for circle in circles:
         center = np.array(circle.dxf.center)
@@ -91,7 +92,8 @@ def CirclePath(circles, resolution):
         paths.append(coordinates)
         radii.append(round(radius.tolist(),5))
         centers.append(center.tolist())
-    return paths, centers, radii
+        angles.append((0, 0))
+    return paths, centers, radii, angles
 
 def PolyPath (polylines):
     paths = []
@@ -110,14 +112,18 @@ def LwPolyPath (lwpolylines):
 
 def ArcPath(arcs, resolution):
     paths = []
+    angles = []
+    centers = []
+    radii = []
 
     for arc in arcs:
 
         if arc.dxf.end_angle < arc.dxf.start_angle:
             arc.dxf.end_angle += 360  
 
-       
-        theta = np.linspace(arc.dxf.start_angle*(np.pi/180), arc.dxf.end_angle*(np.pi/180), resolution)
+        start_angle = arc.dxf.start_angle
+        end_angle = arc.dxf.end_angle
+        theta = np.linspace(start_angle*(np.pi/180), end_angle*(np.pi/180), resolution)
     
         
         center = np.array(arc.dxf.center)
@@ -129,25 +135,35 @@ def ArcPath(arcs, resolution):
         z = np.full_like(x, center[2])
         coordinates = np.stack((x, y, z), axis=-1)
         paths.append(coordinates)
-    return paths
+        radii.append(round(radius.tolist(),5))
+        centers.append(center.tolist())
+        angles.append((start_angle, end_angle))
+
+    return paths, centers, radii, angles
 
 def AllPathSelect(lines, polylines, lwpolylines, splines, circles, texts, mtexts, hatchs, dimentions, inserts, arcs, circle_n, simu = False):
     allpaths = []
     centers = []
     radii = []
+    angles = []
 
     if arcs is not None:
-        arcpaths = ArcPath(arcs, circle_n)
+        arcpaths, arc_centers, arc_radii, arc_angles = ArcPath(arcs, circle_n)
         allpaths.extend(arcpaths) if simu else None
+        centers.extend(arc_centers)
+        radii.extend(arc_radii)
+        angles.extend(arc_angles)
 
     if lines is not None:
         linepaths = LinePath(lines, 2)
         allpaths.extend(linepaths)
 
     if circles is not None:
-        circlepaths, centers, radii = CirclePath(circles, circle_n)
+        circlepaths, circle_centers, circle_radii, circle_angles = CirclePath(circles, circle_n)
         allpaths.extend(circlepaths) if simu else None
-
+        centers.extend(circle_centers)
+        radii.extend(circle_radii)
+        angles.extend(circle_angles)
 
     if polylines is not None:
         polypaths = PolyPath(polylines)
@@ -157,7 +173,8 @@ def AllPathSelect(lines, polylines, lwpolylines, splines, circles, texts, mtexts
         lwpolypaths = LwPolyPath(lwpolylines)
         allpaths.extend(lwpolypaths)
 
-    return allpaths, centers, radii
+    curvepaths = list(zip(centers, radii, angles))
+    return allpaths, curvepaths
 
 def DXF():
     # Initialize tk

@@ -28,8 +28,8 @@ doc = ezdxf.readfile("DXFs\CirculoYCuadrado.DXF")
 
 model = doc.modelspace()
 
-lines, polylines, lwpolylines, splines, circles, texts, mtexts, hatchs, dimentions, inserts, arcs = GiveTypes(model, print_e=True)
-linepaths, centers, radii = AllPathSelect(lines, polylines, lwpolylines, splines, circles, texts, mtexts, hatchs, dimentions, inserts, arcs, 5)
+lines, polylines, lwpolylines, splines, circles_dxf, texts, mtexts, hatchs, dimentions, inserts, arcs = GiveTypes(model, print_e=True)
+linepaths, curvepaths = AllPathSelect(lines, polylines, lwpolylines, splines, circles_dxf, texts, mtexts, hatchs, dimentions, inserts, arcs, 5)
 
 def reproducir_alarma(frecuencia=500, duracion=300):
     """
@@ -129,9 +129,14 @@ def draw_circles(g, center, radius, scale = 1):
 c = g.GCommand
 c('SP 150000,150000')
 
-Vector_move(g, linepaths, circles, radii, scale=0.2)
-for center, radius in zip(centers, radii):
-    draw_circles(g, center, radius, scale=0.2)
+
+Vector_move(g, linepaths, scale=0.2)
+
+for center, radius, angles in curvepaths:
+    if angles == (0, 0):
+        draw_circles(g, center, radius, scale=0.2)
+    else:
+        print('crear funcion para arcos dumbass')
 
 
 
