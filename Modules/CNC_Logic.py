@@ -1,4 +1,15 @@
 import gclib
+import winsound
+
+def reproducir_alarma(frecuencia=500, duracion=300):
+    """
+    Reproduce un beep que simula una alarma.
+    
+    Parámetros:
+      - frecuencia: Frecuencia del sonido en Hertz (por defecto 2500 Hz).
+      - duracion: Duración del sonido en milisegundos (por defecto 1000 ms).
+    """
+    winsound.Beep(frecuencia, duracion)
 
 def driver_conection(metodo_conexion):
     """
@@ -44,7 +55,6 @@ def deg_to_counts(deg):
     """Convierte grados a 'counts."""
     return round(deg/8.05556e-5)
 
-
 def move_to_position(g, x, y=None, scale=1.0, relative=False, wait = True):
     """
     Envía un comando al controlador para mover la máquina a una posición dada.
@@ -69,36 +79,72 @@ def move_to_position(g, x, y=None, scale=1.0, relative=False, wait = True):
     g.GMotionComplete('AB')
     g.GMotionComplete('C') if wait else None
 
+def setup_vector_mode(g, VECTOR_SPEED  = 150000, VECTOR_ACCEL  = 1000000, VECTOR_DECEL  = 1000000):
+    """Configura el modo vectorial en 2D (ejes A y B) y sus parámetros."""
+    c = g.GCommand
+    c('VM AB')                         # Inicializa el plano 2D para X, Y
+    c(f'VS {VECTOR_SPEED}')            # Velocidad del vector
+    c(f'VA {VECTOR_ACCEL}')            # Aceleración del vector
+    c(f'VD {VECTOR_DECEL}')            # Desaceleración del vector
+    
+def draw_circles(g, center, radius, scale = 1):
+    c = g.GCommand
+    r = mm_to_counts(radius)
+    x0, y0, z0 = map(mm_to_counts, center)
+    move_to_position(g, (x0+r), y0, scale, relative=False)
+    reproducir_alarma(1000, 400)
+    print('\nPRENDE LÁSER!!!!!!!!!!!')
+    setup_vector_mode(g)
+    c(f'CR {r*scale}, 0, 360')
+    c('VE')
+    c('BGS')
+    g.GMotionComplete('AB')
+    reproducir_alarma(1000, 400)
+    print('\nPARA LÁSER XXXXXXXXXXXX')
 
-def dxf_lines(linepaths, g):
+def draw_lines(g, entity, scale = 1):
     """
-    Procesa una lista de entidades DXF y las traduce en movimientos de la máquina.
+    Dibuja una entidad que puede ser línea (2 puntos) o polilínea (N puntos).
+    - entity: lista de puntos [(x_mm, y_mm, z_mm), ...]
+    - laser_on: indica si queremos encender/apagar láser con mensajes específicos.
+    """
+    g.GTimeout(int(30e3))
+    c = g.GCommand
+    x0, y0, z0 = map(mm_to_counts, entity[0])
+    move_to_position(g, x0, y0, scale)
+    reproducir_alarma(1000,400)
+    print('\nPRENDE LÁSER!!!!!!!!!!!')
+    setup_vector_mode(g)
+    
+    
+    for i in range(1, len(entity)):
+        x, y, z = map(mm_to_counts, entity[i])
+        dx = (x - x0)*scale
+        dy = (y - y0)*scale
+        c(f'VP {dx}, {dy}') 
+    c('VE')
+    c('BGS')
+    g.GMotionComplete('AB')
+    reproducir_alarma(1000,400)
+    print('\nPARA LÁSER XXXXXXXXXXXX')
 
-    Parámetros:
-        allpaths: Lista de entidades DXF (líneas o polilíneas).
-        g: Objeto controlador Galil.
-    """
+def Vector_move(g, linepaths, curvepaths, scale = 1):
+    '''
+    This function calculates the trajectory for lines, polylines, circles, and arcs.
+    '''
+    c = g.GCommand
+    g.GTimeout(int(30e3))
+    
+    # Verificar si alguno de los parámetros es None
+    if linepaths is None:
+        linepaths = []
+    if curvepaths is None:
+        curvepaths = []
+
     for i, entity in enumerate(linepaths):
         if len(entity) == 2:  #  LINE
-            print(f'  -------------START_{i}-------------')
-            print('\n -------------FROM-------------')
-
-            x1, y1, z1 = map(mm_to_counts, entity[0])
-            move_to_position(g, x1, y1, scale=1)
-
-            print('start lasser')
-
-            print('\n -------------TO-------------')
-
-            x2, y2, z2 = map(mm_to_counts, entity[1])
-            move_to_position(g, x2, y2, scale=1)
-
-            print('stop lasser')
-            print(f'\n -------------FINISH_{i}-------------')
-
-        else:  # POLYLINE
-            print(f'\n\n\n Es una PolilInea compuesta por {len(entity)} líneas')
-
-            for j, point in enumerate(entity):
-                x, y, z = map(mm_to_counts, point)
-                move_to_position(g, x, y, scale=1)
+            draw_lines(g, entity, scale)
+            
+        else: #POLOLINEA
+            print(f'\n\n Es una PolilInea compuesta por {len(entity)} Puntos')
+            draw_lines(g, entity, scale)

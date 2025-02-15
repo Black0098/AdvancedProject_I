@@ -16,7 +16,8 @@ import winsound
 g = gclib.py()
 g = driver_conection('192.168.1.100')
 g.GTimeout(int(30e3))
-#c = g.GCommand
+c = g.GCommand
+c('SP 150000,150000')
 
 #Dxf reading---------------------------------------------------------------------------------------------------------------------
 
@@ -24,91 +25,18 @@ allpaths = []
 #doc = ezdxf.readfile("DXFs\LineasYCirculos.DXF") 
 #doc = ezdxf.readfile("DXFs\HexagonoYCuadrado.DXF")
 #doc = ezdxf.readfile("DXFs\Poly.DXF") 
-doc = ezdxf.readfile("DXFs\CirculoYCuadrado.DXF") 
+#doc = ezdxf.readfile("DXFs\CirculoYCuadrado.DXF") 
+doc = ezdxf.readfile("DXFs\Arcs.DXF")
 
 model = doc.modelspace()
 
 lines, polylines, lwpolylines, splines, circles_dxf, texts, mtexts, hatchs, dimentions, inserts, arcs = GiveTypes(model, print_e=True)
 linepaths, curvepaths = AllPathSelect(lines, polylines, lwpolylines, splines, circles_dxf, texts, mtexts, hatchs, dimentions, inserts, arcs, 5)
 
-def reproducir_alarma(frecuencia=500, duracion=300):
-    """
-    Reproduce un beep que simula una alarma.
-    
-    Parámetros:
-      - frecuencia: Frecuencia del sonido en Hertz (por defecto 2500 Hz).
-      - duracion: Duración del sonido en milisegundos (por defecto 1000 ms).
-    """
-    winsound.Beep(frecuencia, duracion)
 
-# Reproduce una alarma única
-
-
-
-
-def Vector_move(g, linepaths, centers, radii, scale = 1):
-    '''
-    This function calculates the trajectory for lines, polylines, circles, and arcs.
-    '''
-    c = g.GCommand
-    g.GTimeout(int(30e3))
-    
-    # Verificar si alguno de los parámetros es None
-    if linepaths is None:
-        linepaths = []
-    if centers is None:
-        centers = []
-    if radii is None:
-        radii = []
-
-    for i, entity in enumerate(linepaths):
-        if len(entity) == 2:  #  LINE
-            draw_lines(g, entity, scale)
-            
-        else: #POLOLINEA
-            print(f'\n\n Es una PolilInea compuesta por {len(entity)} Puntos')
-            draw_lines(g, entity, scale)
-
-
-def setup_vector_mode(g, VECTOR_SPEED  = 150000, VECTOR_ACCEL  = 1000000, VECTOR_DECEL  = 1000000):
-    """Configura el modo vectorial en 2D (ejes A y B) y sus parámetros."""
-    c = g.GCommand
-    c('VM AB')                         # Inicializa el plano 2D para X, Y
-    c(f'VS {VECTOR_SPEED}')            # Velocidad del vector
-    c(f'VA {VECTOR_ACCEL}')            # Aceleración del vector
-    c(f'VD {VECTOR_DECEL}')            # Desaceleración del vector
-    
-def draw_lines(g, entity, scale = 1):
-    """
-    Dibuja una entidad que puede ser línea (2 puntos) o polilínea (N puntos).
-    - entity: lista de puntos [(x_mm, y_mm, z_mm), ...]
-    - laser_on: indica si queremos encender/apagar láser con mensajes específicos.
-    """
-    g.GTimeout(int(30e3))
-    c = g.GCommand
-    x0, y0, z0 = map(mm_to_counts, entity[0])
-    move_to_position(g, x0, y0, scale)
-    reproducir_alarma(1000,400)
-    print('\nPRENDE LÁSER!!!!!!!!!!!')
-    setup_vector_mode(g)
-    
-    
-    for i in range(1, len(entity)):
-        x, y, z = map(mm_to_counts, entity[i])
-        dx = (x - x0)*scale
-        dy = (y - y0)*scale
-        c(f'VP {dx}, {dy}') 
-    c('VE')
-    c('BGS')
-    g.GMotionComplete('AB')
-    reproducir_alarma(1000,400)
-    print('\nPARA LÁSER XXXXXXXXXXXX')
-    
 
 time.sleep(3)
 reproducir_alarma()
-
-
 
 def draw_circles(g, center, radius, scale = 1):
     c = g.GCommand
@@ -125,9 +53,24 @@ def draw_circles(g, center, radius, scale = 1):
     reproducir_alarma(1000, 400)
     print('\nPARA LÁSER XXXXXXXXXXXX')
 
+def draw_arcs(g, center, radius, angles, scale = 1):
+    c = g.GCommand
+    r = mm_to_counts(radius)
+    x0, y0, z0 = map(mm_to_counts, center)
+    a0, a1 = map(np.radians, angles)
+    move_to_position(g, (x0 + r*np.cos(a0)), (y0 + r*np.sin(a0)), scale, relative=False)
+    reproducir_alarma(1000, 400)
+    print('\nPRENDE LÁSER!!!!!!!!!!!')
+    setup_vector_mode(g)
+    c(f'CR {r*scale}, {angles[0]}, {angles[1]-angles[0]}')
+    c('VE')
+    c('BGS')
+    g.GMotionComplete('AB')
+    reproducir_alarma(1000, 400)
+    print('\nPARA LÁSER XXXXXXXXXXXX')
 
-c = g.GCommand
-c('SP 150000,150000')
+
+
 
 
 Vector_move(g, linepaths, scale=0.2)
@@ -135,8 +78,11 @@ Vector_move(g, linepaths, scale=0.2)
 for center, radius, angles in curvepaths:
     if angles == (0, 0):
         draw_circles(g, center, radius, scale=0.2)
+        print(f'\ncirculo con centro en {center} y radio de {radius}')
     else:
-        print('crear funcion para arcos dumbass')
+        print(f'\narco con centro en {center} y radio de {radius}\nangulo inicial {angles[0]}\nangulo final {angles[1]}')
+        draw_arcs(g, center, radius, angles, scale=0.2)
+
 
 
 

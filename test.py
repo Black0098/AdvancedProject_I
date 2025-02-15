@@ -13,7 +13,7 @@ doc = ezdxf.readfile("DXFs\Poly.DXF")
 model = doc.modelspace()
 
 lines, polylines, lwpolylines, splines, circles, texts, mtexts, hatchs, dimentions, inserts, arcs = GiveTypes(model, print_e=True)
-linepaths, centers, radii = AllPathSelect(lines, polylines, lwpolylines, splines, circles, texts, mtexts, hatchs, dimentions, inserts, arcs, 20)
+linepaths, curvepaths = AllPathSelect(lines, polylines, lwpolylines, splines, circles, texts, mtexts, hatchs, dimentions, inserts, arcs, 20)
 
 
 
@@ -28,44 +28,44 @@ def reproducir_alarma(frecuencia=500, duracion=300):
     """
     winsound.Beep(frecuencia, duracion)
 
-# Reproduce una alarma única
 reproducir_alarma()
 
-# O bien, reproduce la alarma tres veces con una pequeña pausa entre cada una
-#
-#reproducir_alarma()
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Parámetros
+r = 10
+start_deg = 270
+end_deg = 450  # 450° equivale a 90° (450-360)
+angles_deg = np.linspace(start_deg, end_deg, 200)
+angles_rad = np.deg2rad(angles_deg)
+
+# Coordenadas del arco
+x_arc = r * np.cos(angles_rad)
+y_arc = r * np.sin(angles_rad)
+
+# Dibujo del círculo completo para referencia
+theta = np.linspace(0, 2*np.pi, 300)
+x_circle = r * np.cos(theta)
+y_circle = r * np.sin(theta)
+
+# Graficar
+fig, ax = plt.subplots(figsize=(6,6))
+ax.plot(x_circle, y_circle, 'k--', label="Círculo")
+ax.plot(x_arc, y_arc, 'b-', lw=2, label="Arco")
+ax.plot(r * np.cos(np.deg2rad(start_deg)), r * np.sin(np.deg2rad(start_deg)),
+        'ro', label="Inicio (270°)")
+ax.plot(r * np.cos(np.deg2rad(end_deg)), r * np.sin(np.deg2rad(end_deg)),
+        'go', label="Fin (450°/90°)")
+
+ax.set_aspect('equal')
+ax.grid(True)
+ax.legend()
+ax.set_xlabel("X")
+ax.set_ylabel("Y")
+ax.set_title("Arco de 270° a 450° en un círculo de radio 10")
+
+plt.show()
 
 
-
-
-'''
-
-    for i, entity in enumerate(linepaths):
-        if len(entity) == 2:  #  LINE
-            x1, y1, z1 = map(mm_to_counts, entity[0])
-            x2, y2, z2 = map(mm_to_counts, entity[1])
-            move_to_position(g, x1, y1, scale=1)
-            print('PRENDE LASSER!!!!!!!!!!!')
-            c('VM AB')              #inicializa un plano 2d para x,y
-            c('VS 150000')          #Velocidad del vector 
-            c('VA 1000000')         #Aceleracion del vector
-            c('VD 1000000')         #Desaceleracion del vector
-            c(f'VP {x2-x1}, {y2-y1}')     #Establece la direccion a la que se dirige 
-            c('VE')                 #Finaliza el vector 
-            c('BGS')                #Inicia secuencia
-            print('\nPARA LASER XXXXXXXXXXXX')
-        else: #POLOLINEA
-            print(f'\n\n Es una PolilInea compuesta por {len(entity)} Puntos')
-            x0, y0, z1 = map(mm_to_counts, entity[0])
-            move_to_position(g, x0, y0, scale=1)
-            c('VM AB')              #inicializa un plano 2d para x,y
-            c('VS 150000')          #Velocidad del vector 
-            c('VA 1000000')         #Aceleracion del vector
-            c('VD 1000000')         #Desaceleracion del vector
-            for j, point in enumerate(entity):
-                x, y, z = map(mm_to_counts, point)
-                c(f'VP {x-x0}, {y-y0}')
-            c('VE')
-            c('BGS')
-'''
 
