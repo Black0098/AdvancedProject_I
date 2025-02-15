@@ -5,7 +5,6 @@ import time
 g = gclib.py()
 
 print('')
-#g = driver_conection('COM4 -b 19200')
 g = driver_conection('192.168.1.100')
 give_info(g)
 
@@ -14,7 +13,7 @@ doc = DXF()
 model = doc.modelspace()
 
 lines, polylines, lwpolylines, splines, circles, texts, mtexts, hatchs, dimentions, inserts, arcs = GiveTypes(model, print_e=False)
-linepaths, centers, radii  = AllPathSelect(lines, polylines, lwpolylines, splines, circles, texts, mtexts, hatchs, dimentions, inserts, arcs, 5)
+linepaths, curvepaths = AllPathSelect(lines, polylines, lwpolylines, splines, circles, texts, mtexts, hatchs, dimentions, inserts, arcs, 5)
 
 
 x = 75          # Posición final (en mm)
@@ -26,9 +25,7 @@ yc= round(y/3e-5)
 zc= round(z/3e-5)  
 
 
-def mmtocounts(mm):
-    counts = round(mm/3e-5)
-    return counts
+
 
 
 time_out  = int(30e3)
@@ -58,7 +55,7 @@ while menu:
 
 
             input('Press Enter to continue...')
-            dxf_lines(linepaths , g)
+            Vector_move(g, linepaths, scale=0.5)
 
         except Exception as e:
 
