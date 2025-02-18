@@ -10,7 +10,9 @@ import time
 import winsound
 
 
-
+#Phisical parameters------------------------------------------------------------------------------------------------------------
+pen_diameter = 3 #mm
+pen_r = pen_diameter/2
 
 #Galil connection----------------------------------------------------------------------------------------------------------------
 g = gclib.py()
@@ -23,10 +25,10 @@ c('SP 150000,150000')
 
 allpaths = []
 #doc = ezdxf.readfile("DXFs\LineasYCirculos.DXF") 
-#doc = ezdxf.readfile("DXFs\HexagonoYCuadrado.DXF")
+doc = ezdxf.readfile("DXFs\HexagonoYCuadrado.DXF")
 #doc = ezdxf.readfile("DXFs\Poly.DXF") 
 #doc = ezdxf.readfile("DXFs\CirculoYCuadrado.DXF") 
-doc = ezdxf.readfile("DXFs\Arcs.DXF")
+#doc = ezdxf.readfile("DXFs\Arcs.DXF")
 
 model = doc.modelspace()
 
@@ -38,53 +40,13 @@ linepaths, curvepaths = AllPathSelect(lines, polylines, lwpolylines, splines, ci
 time.sleep(3)
 reproducir_alarma()
 
-def draw_circles(g, center, radius, scale = 1):
-    c = g.GCommand
-    r = mm_to_counts(radius)
-    x0, y0, z0 = map(mm_to_counts, center)
-    move_to_position(g, (x0+r), y0, scale, relative=False)
-    reproducir_alarma(1000, 400)
-    print('\nPRENDE LÁSER!!!!!!!!!!!')
-    setup_vector_mode(g)
-    c(f'CR {r*scale}, 0, 360')
-    c('VE')
-    c('BGS')
-    g.GMotionComplete('AB')
-    reproducir_alarma(1000, 400)
-    print('\nPARA LÁSER XXXXXXXXXXXX')
 
-def draw_arcs(g, center, radius, angles, scale = 1):
-    c = g.GCommand
-    r = mm_to_counts(radius)
-    x0, y0, z0 = map(mm_to_counts, center)
-    a0, a1 = map(np.radians, angles)
-    move_to_position(g, (x0 + r*np.cos(a0)), (y0 + r*np.sin(a0)), scale, relative=False)
-    reproducir_alarma(1000, 400)
-    print('\nPRENDE LÁSER!!!!!!!!!!!')
-    setup_vector_mode(g)
-    c(f'CR {r*scale}, {angles[0]}, {angles[1]-angles[0]}')
-    c('VE')
-    c('BGS')
-    g.GMotionComplete('AB')
-    reproducir_alarma(1000, 400)
-    print('\nPARA LÁSER XXXXXXXXXXXX')
+scale = 0.001
+curvepaths_0 = []
+Vector_move(g, linepaths, curvepaths_0, scale)
+Filled_Vector_move(g, linepaths, curvepaths, pen_diameter, scale)
 
-
-
-
-
-Vector_move(g, linepaths, scale=0.2)
-
-for center, radius, angles in curvepaths:
-    if angles == (0, 0):
-        draw_circles(g, center, radius, scale=0.2)
-        print(f'\ncirculo con centro en {center} y radio de {radius}')
-    else:
-        print(f'\narco con centro en {center} y radio de {radius}\nangulo inicial {angles[0]}\nangulo final {angles[1]}')
-        draw_arcs(g, center, radius, angles, scale=0.2)
-
-
-
+close_conection(g)
 
 
 

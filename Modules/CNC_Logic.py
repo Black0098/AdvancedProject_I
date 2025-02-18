@@ -1,5 +1,6 @@
-import gclib
-import winsound
+import gclib, math, numpy as np, time, winsound
+
+
 
 def reproducir_alarma(frecuencia=500, duracion=300):
     """
@@ -55,6 +56,37 @@ def deg_to_counts(deg):
     """Convierte grados a 'counts."""
     return round(deg/8.05556e-5)
 
+def fill_question():
+    """
+    Pregunta si la linea o el circulo necesita un relleno
+    """
+    while True:
+        fill = input('desea rellenar el circulo? y/n\n')
+        if fill == 'y' or fill == 'n':
+            break
+        else:
+            print('respuesta incorrecta\n')
+    return fill
+
+def circle_fills(curvepaths):
+    """
+    Recorre `curvepaths` y pregunta si se debe rellenar el círculo antes de ejecutar los movimientos.
+    Devuelve una lista con las respuestas de si se debe rellenar o no para cada círculo.
+    """
+    fills = []  # Lista que almacenará las respuestas de 'rellenar' para cada curva
+
+    for center, radius, angles in curvepaths:
+        if angles == (0, 0):  # Solo preguntamos por círculos
+            print(f"Centro: {center}, Radio: {radius}")
+            fill = fill_question()  # Preguntamos si se debe rellenar
+            fills.append(fill) 
+        else:
+            
+            fills.append('n')  # 'n' indica que no hay relleno para los arcos
+            print(f'\narco con centro en {center} y radio de {radius}\nangulo inicial {angles[0]}\nangulo final {angles[1]}')
+    
+    return fills
+
 def move_to_position(g, x, y=None, scale=1.0, relative=False, wait = True):
     """
     Envía un comando al controlador para mover la máquina a una posición dada.
@@ -96,6 +128,26 @@ def draw_circles(g, center, radius, scale = 1):
     print('\nPRENDE LÁSER!!!!!!!!!!!')
     setup_vector_mode(g)
     c(f'CR {r*scale}, 0, 360')
+    c('VE')
+    c('BGS')
+    g.GMotionComplete('AB')
+    reproducir_alarma(1000, 400)
+    print('\nPARA LÁSER XXXXXXXXXXXX')
+
+def draw_arcs(g, center, radius, angles, scale = 1):
+    c = g.GCommand
+    r = mm_to_counts(radius)
+    rx = mm_to_counts(radius*math.cos(np.radians(angles[0])))
+    ry = mm_to_counts(radius*math.sin(np.radians(angles[0])))
+    x0, y0, z0 = map(mm_to_counts, center)
+    newx = (x0 + rx)
+    newy = (y0 + ry)
+
+    move_to_position(g, newx, newy, scale, relative=False)
+    reproducir_alarma(1000, 400)
+    print('\nPRENDE LÁSER!!!!!!!!!!!')
+    setup_vector_mode(g)
+    c(f'CR {r*scale}, {angles[0]}, {angles[1]-angles[0]}')
     c('VE')
     c('BGS')
     g.GMotionComplete('AB')
@@ -148,3 +200,51 @@ def Vector_move(g, linepaths, curvepaths, scale = 1):
         else: #POLOLINEA
             print(f'\n\n Es una PolilInea compuesta por {len(entity)} Puntos')
             draw_lines(g, entity, scale)
+
+    for center, radius, angles in curvepaths:
+        if angles == (0, 0):
+            draw_circles(g, center, radius, scale)
+            print(f'\ncirculo con centro en {center} y radio de {radius}')
+        else:
+            print(f'\narco con centro en {center} y radio de {radius}\nangulo inicial {angles[0]}\nangulo final {angles[1]}')
+            draw_arcs(g, center, radius, angles, scale)
+
+def Filled_Vector_move(g, linepaths, curvepaths, beam_d, scale = 1):
+    '''
+    This function calculates the trajectory for lines, polylines, circles, and arcs.
+    '''
+    c = g.GCommand
+    g.GTimeout(int(30e3))
+    
+    # Verificar si alguno de los parámetros es None
+    if linepaths is None:
+        linepaths = []
+    if curvepaths is None:
+        curvepaths = []
+
+    for i, entity in enumerate(linepaths):
+        if len(entity) == 2:  #  LINE
+            draw_lines(g, entity, scale)
+            
+        else: #POLOLINEA
+            print(f'\n\n Es una PolilInea compuesta por {len(entity)} Puntos')
+            draw_lines(g, entity, scale)
+
+    fills = circle_fills(curvepaths)
+    for (center, radius, angles), fill in zip(curvepaths, fills):
+        if angles == (0, 0):
+            
+            if fill == 'y':
+                
+                layers = int(radius * scale // beam_d)
+                print(f'\n Numero de capas para reyenar el circulo: {layers}')
+                
+                for i in range(layers):
+                    draw_circles(g, center, radius, scale)
+                    radius -= beam_d
+                
+            else:
+                draw_circles(g, center, radius, scale)
+        else:
+            draw_arcs(g, center, radius, angles, scale)
+

@@ -25,9 +25,6 @@ linepaths, curvepaths = AllPathSelect(lines, polylines, lwpolylines, splines, ci
 
 max_lim = max(array.max() for array in linepaths)
 
-
-#print(curvepaths[0][0])
-
 print("\n HOLA \n")
 
 for center, radius, angles in curvepaths:

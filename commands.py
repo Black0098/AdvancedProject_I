@@ -16,8 +16,8 @@ lines, polylines, lwpolylines, splines, circles, texts, mtexts, hatchs, dimentio
 linepaths, curvepaths = AllPathSelect(lines, polylines, lwpolylines, splines, circles, texts, mtexts, hatchs, dimentions, inserts, arcs, 5)
 
 
-x = 75          # Posición final (en mm)
-y = 75+16
+x = 0          # Posición final (en mm)
+y = 0
 z = 0
 
 xc= round(x/3e-5)  # Conversión de mm a unidades
@@ -42,7 +42,7 @@ while menu:
     print("-----------------------------------------------------------------------------------")
     print("\nBienvenido al panel de controlo V 0.01")
     print("Digite el numero correspondiente a la accion que desea realizar \n")
-    sel = int(input(' 1. Regresar a Home \n 2. Comenzar lectura del DXF \n 3. Centro \n 4. Establece 0 global \n 5. Salir \n' ))
+    sel = int(input(' 1. Regresar a Home \n 2. Comenzar lectura del DXF \n 3. Centro \n 4. Establece 0 global \n 5. Salir \n 6. Movimiento Libre \n' ))
 
     if sel == 1: 
         c('HM')
@@ -54,8 +54,8 @@ while menu:
         try :
 
 
-            input('Press Enter to continue...')
-            Vector_move(g, linepaths, scale=0.5)
+            input('Presione enter para comenzar la rutina')
+            Vector_move(g, linepaths, curvepaths, scale = 0.5)
 
         except Exception as e:
 
@@ -81,6 +81,14 @@ while menu:
     elif sel == 5:
         close_conection(g)
         menu = False
+
+    elif sel == 6:
+        x = float(input('Digite la coordenada x: '))
+        y = float(input('Digite la coordenada y: '))
+        x = mm_to_counts(x)
+        y = mm_to_counts(y)
+        move_to_position(g, x, y, 1, relative=True)
+        print(f'\n The global position Is: {c('PA ?, ?')} \n')
 
     
     else:
