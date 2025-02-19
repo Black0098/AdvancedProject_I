@@ -9,7 +9,7 @@ class Manager(tk.Tk):
         self.title("Control Panel")
         self.geometry("900x600")
 
-        # Barra lateral-------------------------------------------------------------------------
+# Barra lateral-------------------------------------------------------------------------
         self.sidebar = tk.Frame(self, width=50, bg="gray")
         self.sidebar.pack(side="left", fill="y")
 
@@ -34,7 +34,7 @@ class Manager(tk.Tk):
 
 
 
-        # Contenedor de pantallas-------------------------------------------------------------------------
+# Contenedor de pantallas-------------------------------------------------------------------------
         container = tk.Frame(self)
         container.pack(
             side="top",
@@ -52,16 +52,25 @@ class Manager(tk.Tk):
             frame.grid(row=0, column=0, sticky="nsew")
         self.show_frame(Home)
 
+# Metodos del manager-------------------------------------------------------------------------
+
     def show_frame(self, container):                        #This method  shows a frame for the given container 
         frame = self.frames[container]
         frame.tkraise()
         
     def show_tooltip(self, event, tooltip_text):
         # Crear y mostrar el tooltip
-        self.tooltip = tk.Label(self, text=tooltip_text, background=style.LIGHT_GREEN, relief="solid", bd=1.2)
-        self.tooltip.place(x=event.x_root + 20, y=event.y_root + 20)  # Posicionar el tooltip cerca del cursor
+        self.tooltip = tk.Label(self, text=tooltip_text, background="lightgreen", relief="solid", bd=1.2)
+
+        # Obtener la posición del cursor en coordenadas de pantalla
+        x_root, y_root = self.winfo_pointerx(), self.winfo_pointery()
+
+        # Convertir a coordenadas relativas dentro de la ventana
+        x_local = x_root - self.winfo_rootx()
+        y_local = y_root - self.winfo_rooty()
+
+        self.tooltip.place(x=x_local + 20, y=y_local + 20)  # Posicionar el tooltip cerca del cursor
 
     def hide_tooltip(self, event):
-        # Eliminar el tooltip
         if hasattr(self, 'tooltip'):
             self.tooltip.destroy()
