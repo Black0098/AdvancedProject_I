@@ -1,2 +1,4 @@
 **/.Pruebas.py
 *.pyc
+*pycache
+*_pycache__

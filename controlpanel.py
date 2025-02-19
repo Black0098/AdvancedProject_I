@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import filedialog
 import ezdxf
 #from Modules.dxf_functions import *
-from Modules.Galil_functions import *
+from Modules import *
 doc = None
 
 

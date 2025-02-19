@@ -5,6 +5,7 @@ from tkinter import filedialog
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
+import os
 
 
 def GiveTypes(model, print_e = False):
@@ -176,8 +177,8 @@ def AllPathSelect(lines, polylines, lwpolylines, splines, circles, texts, mtexts
     curvepaths = list(zip(centers, radii, angles))
     return allpaths, curvepaths
 
-def DXF():
-    global doc
+def DXF(name = False):
+    #global doc
     # Initialize tk
     root = tk.Tk()
     root.withdraw()  # Hide window
@@ -192,7 +193,13 @@ def DXF():
         try:
             # Read DXF
             doc = ezdxf.readfile(ruta_archivo)
-            print(f"Archivo DXF cargado con exito: {ruta_archivo}")
+            print(f"Archivo DXF cargado con éxito: {ruta_archivo}")
+
+            if name:
+                file_name = os.path.basename(ruta_archivo)
+                return doc, file_name
+            else:
+                return doc
         
         except Exception as e:
             print(f"Error al leer el archivo DXF: {e}")
@@ -207,33 +214,29 @@ def DXF():
 
 def Plot_Animation(allpaths, lim):
 
-
     radio = 0.8
 
-
-
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
+    # Crear figura y eje 2D
+    fig, ax = plt.subplots()
     ax.set_xlim(-lim, lim)
     ax.set_ylim(-lim, lim)
-    ax.set_zlim(-lim, lim)
-    ax.set_box_aspect([1, 1, 1])
+    ax.set_aspect('equal')
     ax.grid()
 
-    x, y, z = allpaths[0][0]  # Primer punto de la primera trayectoria
-    circle_plot, = ax.plot([], [], [], color='blue')
+    # Primer punto de la primera trayectoria (se ignora z)
+    x0, y0, _ = allpaths[0][0]
+    circle_plot, = ax.plot([], [], color='blue')
 
-    # Líneas de todas las allpaths
-    linea_plots = [ax.plot([], [], [], color='red', linewidth=2)[0] for _ in allpaths]
+    # Líneas de todas las trayectorias
+    linea_plots = [ax.plot([], [], color='red', linewidth=2)[0] for _ in allpaths]
 
-    def generar_circulo3d(center, radius, num_points=50):
+    def generar_circulo(center, radius, num_points=50):
+        # Genera un círculo en 2D en torno a center (solo x e y)
         theta = np.linspace(0, 2 * np.pi, num_points)
         x = center[0] + radius * np.cos(theta)
         y = center[1] + radius * np.sin(theta)
-        z = np.full_like(x, center[2])  # El círculo está en el plano z = center[2]
-        return x, y, z
+        return x, y
 
-    # Función de actualización para la animación
     def actualizar(frame):
         # Determinar en qué tramo estamos
         total_puntos = sum(len(t) for t in allpaths)
@@ -243,29 +246,31 @@ def Plot_Animation(allpaths, lim):
             punto_actual -= len(allpaths[segmento_actual])
             segmento_actual += 1
 
-        # Actualizar el círculo
+        # Actualizar el círculo en la posición actual (solo x, y)
         pos = allpaths[segmento_actual][punto_actual]
-        x, y, z = generar_circulo3d(pos, radio)
-        circle_plot.set_data(x, y)
-        circle_plot.set_3d_properties(z)
+        x_circ, y_circ = generar_circulo(pos, radio)
+        circle_plot.set_data(x_circ, y_circ)
 
-        # Limpiar las líneas y actualizarlas
+        # Actualizar las líneas de cada trayectoria
         for i, linea_plot in enumerate(linea_plots):
-            if i <= segmento_actual:
-                puntos = np.vstack(allpaths[i][:punto_actual+1]) if i == segmento_actual else np.vstack(allpaths[i])
+            if i < segmento_actual:
+                # Si ya pasó este segmento, mostramos toda la trayectoria
+                puntos = np.vstack(allpaths[i])
                 linea_plot.set_data(puntos[:, 0], puntos[:, 1])
-                linea_plot.set_3d_properties(puntos[:, 2])
-
+            elif i == segmento_actual:
+                # Si es el segmento actual, mostramos hasta el punto_actual
+                puntos = np.vstack(allpaths[i][:punto_actual+1])
+                linea_plot.set_data(puntos[:, 0], puntos[:, 1])
+            else:
+                # Segmentos futuros se dejan vacíos
+                linea_plot.set_data([], [])
+                
         return [circle_plot] + linea_plots
 
-    # Función para reiniciar la animación
     def reiniciar_animacion():
         for linea_plot in linea_plots:
             linea_plot.set_data([], [])
-            linea_plot.set_3d_properties([])
         return [circle_plot] + linea_plots
-    
-    
 
     frames_totales = sum(len(t) for t in allpaths)
     return fig, frames_totales, actualizar, reiniciar_animacion

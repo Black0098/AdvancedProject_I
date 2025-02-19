@@ -12,19 +12,27 @@ def reproducir_alarma(frecuencia=500, duracion=300):
     """
     winsound.Beep(frecuencia, duracion)
 
-def driver_conection(metodo_conexion):
+def driver_conection(metodo_conexion, update_status=None):
     """
-    Initializes a connection with the Galil driver.
-
+    Inicializa la conexión con el driver Galil.
     """
     g = gclib.py()
     try:
         g.GOpen(metodo_conexion)
-        print("Conexion establecida con:", metodo_conexion)
+        msg = f"Conexion establecida con: {metodo_conexion}"
+        
+        if update_status:
+            update_status(msg)
+        
+        print(msg)
         return g
     except Exception as e:
-        print("Error al conectar:", e)
+        msg = f"Error al conectar: {e}"
+        if update_status:
+            update_status(msg)
+        print(msg)
         return None
+
     
 def close_conection(g):
     """
@@ -37,16 +45,21 @@ def close_conection(g):
     except Exception as e:
         print("Error al cerrar la conexion:", e)
 
-def give_info(g):
+def give_info(g, update_status=None):
     """
-    returns the info of the controller connected
-
+    Retorna la información del controlador conectado.
     """
-    try: 
+    try:
         info = g.GInfo()
+        if update_status:
+            update_status(info)
         print(info)
+        
     except Exception as e:
-        print("Error al dar informacion:", e)
+        msg = f"Error al dar informacion: {e}"
+        if update_status:
+            update_status(msg)
+        print(msg)
 
 def mm_to_counts(mm):
     """Convierte milimetros a 'counts."""
