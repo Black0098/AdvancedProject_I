@@ -3,7 +3,7 @@ import os
 import tkinter as tk 
 from constants import style
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from Modules.dxf_functions import *
+from Modules import *
 
 
 class Home(tk.Frame):
