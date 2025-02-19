@@ -1,12 +1,34 @@
-ez_squarex = [-5, -5, 5, 5, -5]
-ez_squarey = [-5, 5, 5, -5, -5]
 
+from Modules import *
+import gclib
+import winsound
+import time 
 
-def mmtocounts(mm):
-    counts = round(mm/3e-5)
-    return counts
+#Controler definition -------------------------------------------------------------
+g = gclib.py()
+g = driver_conection('192.168.1.100')
+give_info(g)
 
-for i in range(5):
-    ez_squarex[i] = mmtocounts(ez_squarex[i])
+doc = ezdxf.readfile("DXFs\Poly.DXF")
+model = doc.modelspace()
 
-print(ez_squarex)
+lines, polylines, lwpolylines, splines, circles, texts, mtexts, hatchs, dimentions, inserts, arcs = GiveTypes(model, print_e=True)
+linepaths, curvepaths = AllPathSelect(lines, polylines, lwpolylines, splines, circles, texts, mtexts, hatchs, dimentions, inserts, arcs, 20)
+
+def reproducir_alarma(frecuencia=500, duracion=300):
+    """
+    Reproduce un beep que simula una alarma.
+    
+    Parámetros:
+      - frecuencia: Frecuencia del sonido en Hertz (por defecto 2500 Hz).
+      - duracion: Duración del sonido en milisegundos (por defecto 1000 ms).
+    """
+    winsound.Beep(frecuencia, duracion)
+
+reproducir_alarma()
+
+x = mm_to_counts(-0.1)
+y = mm_to_counts(0)
+move_to_position(g, x, y, 1, relative=True)
+
+close_conection(g)
